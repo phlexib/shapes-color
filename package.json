@@ -1,0 +1,20 @@
+{
+  "name": "ae-boilerplate",
+  "version": "1.0.0",
+  "description": "boiler plate for ae dev with gulp and jshint",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/benrohel/ae-boilerplate.git"
+  },
+  "author": "Ben Rohel",
+  "license": "MIT",
+  "homepage": "https://bitbucket.org/benrohel/ae-boilerplate#readme",
+  "dependencies": {
+    "inquirer": "^5.2.0",
+    "jshint": "^2.9.5"
+  }
+}
