@@ -1,7 +1,7 @@
 {
     "window.zoomLevel": 0,
     "files.associations": {
-        "*.js": "jshint"
+        "*.js": "javascript"
     },
     "javascript.validate.enable": false
 }

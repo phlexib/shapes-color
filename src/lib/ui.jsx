@@ -1,5 +1,9 @@
-
-
+/**
+ * Create a UI Panel in Extenscript 
+ * @param {Object} thisObj 
+ * @param {String} userInterfaceString 
+ * @param {String} scriptName 
+ */
 function createUserInterface (thisObj,userInterfaceString,scriptName){
   var pal = (thisObj instanceof Panel) ? thisObj : new Window("palette", scriptName,
   undefined,{resizeable: true});
