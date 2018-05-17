@@ -28,7 +28,7 @@ function executeScript(absFilePath, callback){
 }
 
 gulp.task("runMyScript", ["buildMyScript"], function(done){
-  var absPath = path.join(__dirname, "dist/main.jsx");
+  var absPath = path.join(__dirname, "dist/Easy_Shapes_Color.jsx");
   executeScript(absPath, function(error, stdout, stderr){
     done();
   });
@@ -36,7 +36,7 @@ gulp.task("runMyScript", ["buildMyScript"], function(done){
 
 
 gulp.task("buildMyScript", ["preprocessSources"], function(){
-  return gulp.src(".temp/main.jsx")
+  return gulp.src(".temp/Easy_Shapes_Color.jsx")
     .pipe(include())
     .pipe(header(headerTemplate,{pkg:pkg}))
     .pipe(gulp.dest("dist"))

@@ -1,7 +1,7 @@
 {
   "name": "ae-boilerplate",
   "version": "1.0.0",
-  "description": "boiler plate for ae dev with gulp and jshint",
+  "description": "Update all Colors Keyframes on any Shape",
   "main": "src/main.js",
   "scripts": {
     "test": "start"

@@ -58,7 +58,7 @@ relaodBtn.onClick = function() {
   }
 
 changeColors_btn.onClick = function() {
-  app.beginUndoGroup("Hangar Change Colors");
+  app.beginUndoGroup("Change Colors");
   var currentColors = ChangeColors.getColors();
   ChangeColors.updateColors(currentColors,NEW_COLORS);
   refresh();
