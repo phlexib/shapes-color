@@ -39,9 +39,8 @@ manualPanel = win.add("panel", [0, 0, 245, 500], "CHANGE SHAPES COLORS");
 
 
 //////// UI FUNCTIONS
-   
-relaodBtn.onClick = function() {
-  app.beginUndoGroup("Reload Colors");
+
+function refresh(){
   removeAllChildren(sourceColorsGrp);
   COLORS =[];
   NEW_COLORS = [];
@@ -50,6 +49,11 @@ relaodBtn.onClick = function() {
   for(var c=0 ; c< COLORS.length ; c++){
       addColorGrp(sourceColorsGrp,COLORS[c],[c]);
     }
+}
+   
+relaodBtn.onClick = function() {
+  app.beginUndoGroup("Reload Colors");
+  refresh();
   app.endUndoGroup();
   }
 
@@ -57,6 +61,7 @@ changeColors_btn.onClick = function() {
   app.beginUndoGroup("Hangar Change Colors");
   var currentColors = ChangeColors.getColors();
   ChangeColors.updateColors(currentColors,NEW_COLORS);
+  refresh();
   app.endUndoGroup();
 }
 
