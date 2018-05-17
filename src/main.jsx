@@ -24,19 +24,17 @@ titleGrp.orientation = "row";
 titleGrp.alignment = "left";
 title = titleGrp.add("statictext", [0, 10, 50, 20], "v" + SCRIPTVERSION);
 
-manualPanel = win.add("panel", [5, 160, 245, 500], "CHANGE SHAPES COLORS");
+manualPanel = win.add("panel", [0, 0, 245, 500], "CHANGE SHAPES COLORS");
     relaodBtn = manualPanel.add("button", [000, 75, 220, 95], "RELOAD");   
-    colorGrp = manualPanel.add("panel", [0, 170, 240, 350]);
+    colorGrp = manualPanel.add("panel", [0, 0, 40, 60]);
     colorGrp.borderless = true;
-    colorGrp.orientation = "row";
-    
-    sourceColorsGrp = colorGrp.add("group", [0, 170, 240, 350]);
-    var colorGrp = sourceColorsGrp.add("group", [10, 120, 385, 180], "Group Markers", {
-      orientation: "row",
-      alignment: "fill"
-    });
-    colorGrp.add("statictext", [0, 10, 50, 20], "src");
-    colorGrp.add("statictext", [0, 10, 50, 20], "dst");
+    colorGrp.orientation = "column";
+    colorGrp.alignment ="fill";
+    txtColorGrp = colorGrp.add("group", [0, 0, 40, 60]);
+    txtColorGrp.alignment = "center";
+    txtColorGrp.add("statictext", [1, 10, 30, 30], "src");
+    txtColorGrp.add("statictext", [1, 10, 30, 30], "dst");
+    sourceColorsGrp = colorGrp.add("group", [0, 0, 40, 40]);
     changeColors_btn = manualPanel.add("button", [5, 130, 225, 155], "CHANGE COLORS");
 
 
@@ -44,6 +42,7 @@ manualPanel = win.add("panel", [5, 160, 245, 500], "CHANGE SHAPES COLORS");
    
 relaodBtn.onClick = function() {
   app.beginUndoGroup("Reload Colors");
+  removeAllChildren(sourceColorsGrp);
   COLORS =[];
   NEW_COLORS = [];
   COLORS = ChangeColors.getColors();
@@ -87,11 +86,16 @@ function updateUILayout(container) {
 
   ///ADD NEW MARKER GROUP
   function addColorGrp(parent, color,index) {
+
+    var hexString = floatToHex(color).toUpperCase(); 
+    var rString =  parseInt(color[0]*255);
+    var gString = parseInt(color[1]*255);
+    var bString =  parseInt(color[2]*255);
     var colorGrp = parent.add("group", [10, 120, 385, 180], "Group Markers", {
       orientation: "row",
-      alignment: "fill"
+      alignment: "right"
     });
-    colorText = colorGrp.add("staticText",[10,10,30,30],index);
+    colorText = colorGrp.add("staticText",[10,10,60,30], hexString);
     colorSrcBtn = colorGrp.add("button", [10, 10, 30, 30], "");
     butColor(colorSrcBtn, color);
     colorSrcBtn.helpTip = "Current Color";
@@ -101,10 +105,12 @@ function updateUILayout(container) {
       var pickedColor = pickColor();
       butColor(this, pickedColor);
       NEW_COLORS[index] = pickedColor;
+      var kids = this.parent.children;
+      kids[3].text = floatToHex(pickedColor).toUpperCase();
     };
 
+    newColorText = colorGrp.add("staticText",[10,10,60,30], hexString );
     parent.orientation = "column";
-
     updateUILayout(parent); //Update UI
   }
 
@@ -118,6 +124,30 @@ function updateUILayout(container) {
   //////////////////////////////////////////////////////////////// TOOLS  /////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  function removeAllChildren(parent) {
+    var kids = parent.children;
+    var numKids = kids.length;
+    // Remove all kids
+    while (numKids > 0) {
+      //keep at least one default
+      parent.remove(kids[numKids - 1]);
+      numKids--;
+    }
+    updateUILayout(parent); //Update UI
+  }
+
+  function floatToHex (colorArray){
+      R = parseInt(colorArray[0]*255);
+      G = parseInt(colorArray[1]*255);
+      B = parseInt(colorArray[2]*255);
+
+      hexArray = "#" + R.toString(16) + G.toString(16) + B.toString(16);
+    return hexArray
+  }
+
+  function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r*255 << 16) + (g*255 << 8) + b*255).toString(16).slice(1);
+}
   // COLORS PALETTE FEATURES
   var pickColor = function() {
     var myDecColor = 0;
@@ -210,6 +240,8 @@ var ChangeColors = (function() {
   var comp = aeq.getActiveComp();
   var layers = aeq.getSelectedLayersOrAll();
   var compColors = aeq.arrayEx();
+  var colorProps = aeq.arrayEx();
+  var collectedColors = aeq.arrayEx();
 /**
  * First Transform Old Colors into a padded version
  * Then loop through keys to change Colors
@@ -218,7 +250,9 @@ var ChangeColors = (function() {
  */
   
   function getColors (){
-    var collectedColors = aeq.arrayEx();
+    compColors = aeq.arrayEx();
+    colorProps = aeq.arrayEx();
+    collectedColors = aeq.arrayEx();
 
     layers.forEach(function(shapeLayer) {
       var props = aeq.arrayEx(
@@ -232,6 +266,7 @@ var ChangeColors = (function() {
       // grab comp colors
       props.forEach(function(prop) {
         if((prop.matchName === "ADBE Vector Stroke Color") || (prop.matchName === "ADBE Vector Fill Color")){
+          colorProps.push(prop);
           if(prop.numKeys > 0){
             for(var i = 1; i <= prop.numKeys; i++){
               compColors.push(prop.keyValue(i));
@@ -254,17 +289,17 @@ var ChangeColors = (function() {
   }
 
   function updateColors (oldColors,newColors){
-    layers.forEach(function(shapeLayer) {
-      var props = aeq.arrayEx(
-        aeq.getPropertyChildren(shapeLayer, {
-          props: true,
-          separate: false,
-          groups: true
-        })
-      );
+    // layers.forEach(function(shapeLayer) {
+    //   var props = aeq.arrayEx(
+    //     aeq.getPropertyChildren(shapeLayer, {
+    //       props: true,
+    //       separate: false,
+    //       groups: true
+    //     })
+    //   );
 
     // assign colors from hard coded
-    props.forEach(function(prop) {
+    colorProps.forEach(function(prop) {
       if((prop.matchName === "ADBE Vector Stroke Color") || (prop.matchName === "ADBE Vector Fill Color")){
         if(prop.numKeys > 0){
           for(var i = 1; i <= prop.numKeys; i++){
@@ -286,7 +321,7 @@ var ChangeColors = (function() {
         }
       }
       });
-    });
+    // });
   }
 
 /**
@@ -372,9 +407,11 @@ var isEqual = function (value, other) {
 function findInArray(arr, val) {
   var found = false;
   for (var i = 0; i < arr.length; i++) {
-    if (isEqual( arr[i],val)) {
-      found = true;
-      return found;
+    var arrA = floatToHex(arr[i]);
+    var arrB = floatToHex(val);
+     if (arrA === arrB) {
+        found = true;
+     continue;
     }
   }
   return found;
