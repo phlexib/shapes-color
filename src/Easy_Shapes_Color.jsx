@@ -167,10 +167,11 @@ function updateUILayout(container) {
     function HexToB(h) {return parseInt((cutHex(h)).substring(4, 6), 16);}
     function cutHex(h) {return (h.charAt(0) == "#") ? h.substring(1, 7) : h;}
 
-    r = HexToR(myHexColor) / 255;
-    g = HexToG(myHexColor) / 255;
-    b = HexToB(myHexColor) / 255;
+    r = HexToR(myHexColor)/255;
+    g = HexToG(myHexColor)/255;
+    b = HexToB(myHexColor)/255;
     var colors = [r, g, b, 1];
+
     alert(colors)
     return colors;
   };
