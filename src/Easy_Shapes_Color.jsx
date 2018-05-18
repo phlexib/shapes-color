@@ -157,36 +157,28 @@ function updateUILayout(container) {
   var pickColor = function() {
     var myDecColor = 0;
     myDecColor = $.colorPicker();
-
     var myHexColor = myDecColor.toString(16);
+    
+    alert(myDecColor)
+    alert(myHexColor)
+
+    function HexToR(h) {return parseInt((cutHex(h)).substring(0, 2), 16);}
+    function HexToG(h) {return parseInt((cutHex(h)).substring(2, 4), 16);}
+    function HexToB(h) {return parseInt((cutHex(h)).substring(4, 6), 16);}
+    function cutHex(h) {return (h.charAt(0) == "#") ? h.substring(1, 7) : h;}
 
     r = HexToR(myHexColor) / 255;
     g = HexToG(myHexColor) / 255;
     b = HexToB(myHexColor) / 255;
     var colors = [r, g, b, 1];
-
-    function HexToR(h) {
-      return parseInt((cutHex(h)).substring(0, 2), 16);
-    }
-
-    function HexToG(h) {
-      return parseInt((cutHex(h)).substring(2, 4), 16);
-    }
-
-    function HexToB(h) {
-      return parseInt((cutHex(h)).substring(4, 6), 16);
-    }
-
-    function cutHex(h) {
-      return (h.charAt(0) == "#") ? h.substring(1, 7) : h;
-    }
+    alert(colors)
     return colors;
   };
 
   var butColor = function(object, color) {
 
     if (String(color) != "undefined" && String(color) != "NaN")
-    if (color[0] > 0) {
+    if (color[0] >= 0) {
       object.onDraw = fillRect;
       object.fillBrush = object.graphics.newBrush(object.graphics.BrushType.SOLID_COLOR, color);
       object.visible = 0;
@@ -242,8 +234,7 @@ function updateUILayout(container) {
 /* jshint ignore:end */
 var ChangeColors = (function() {
 
-  var comp = aeq.getActiveComp();
-  var layers = aeq.getSelectedLayersOrAll();
+   
   var compColors = aeq.arrayEx();
   var colorProps = aeq.arrayEx();
   var collectedColors = aeq.arrayEx();
@@ -255,11 +246,14 @@ var ChangeColors = (function() {
  */
   
   function getColors (){
+    var comp = aeq.getActiveComp();
+    var layers = aeq.getSelectedLayersOrAll();
     compColors = aeq.arrayEx();
     colorProps = aeq.arrayEx();
     collectedColors = aeq.arrayEx();
 
     layers.forEach(function(shapeLayer) {
+     
       var props = aeq.arrayEx(
         aeq.getPropertyChildren(shapeLayer, {
           props: true,
@@ -294,15 +288,8 @@ var ChangeColors = (function() {
   }
 
   function updateColors (oldColors,newColors){
-    // layers.forEach(function(shapeLayer) {
-    //   var props = aeq.arrayEx(
-    //     aeq.getPropertyChildren(shapeLayer, {
-    //       props: true,
-    //       separate: false,
-    //       groups: true
-    //     })
-    //   );
-
+    var comp = aeq.getActiveComp();
+   
     // assign colors from hard coded
     colorProps.forEach(function(prop) {
       if((prop.matchName === "ADBE Vector Stroke Color") || (prop.matchName === "ADBE Vector Fill Color")){
