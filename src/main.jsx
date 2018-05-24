@@ -1,4 +1,5 @@
 (function (thisObj) {  
+
 #include "lib/ui.jsx"
 #include "../node_modules/aequery/dist/aequery.js"
 #include "../src/components/changeColors.jsx"
@@ -39,24 +40,33 @@ manualPanel = win.add("panel", [0, 0, 245, 500], "CHANGE SHAPES COLORS");
 
 
 //////// UI FUNCTIONS
-   
-relaodBtn.onClick = function() {
+
+function reloadColors() {
   app.beginUndoGroup("Reload Colors");
   removeAllChildren(sourceColorsGrp);
-  COLORS =[];
+  COLORS = [];
   NEW_COLORS = [];
   COLORS = ChangeColors.getColors();
   NEW_COLORS = COLORS;
-  for(var c=0 ; c< COLORS.length ; c++){
-      addColorGrp(sourceColorsGrp,COLORS[c],[c]);
-    }
+  for (var c = 0; c < COLORS.length; c++) {
+    addColorGrp(sourceColorsGrp, COLORS[c], [c]);
+  }
   app.endUndoGroup();
+  
+}
+
+   
+relaodBtn.onClick = function() {
+  reloadColors();
   }
 
+
+
 changeColors_btn.onClick = function() {
-  app.beginUndoGroup("Hangar Change Colors");
+  app.beginUndoGroup("Change Colors");
   var currentColors = ChangeColors.getColors();
   ChangeColors.updateColors(currentColors,NEW_COLORS);
+  reloadColors();
   app.endUndoGroup();
 }
 
@@ -91,14 +101,17 @@ function updateUILayout(container) {
     var rString =  parseInt(color[0]*255);
     var gString = parseInt(color[1]*255);
     var bString =  parseInt(color[2]*255);
+    
     var colorGrp = parent.add("group", [10, 120, 385, 180], "Group Markers", {
       orientation: "row",
       alignment: "right"
     });
+
     colorText = colorGrp.add("staticText",[10,10,60,30], hexString);
     colorSrcBtn = colorGrp.add("button", [10, 10, 30, 30], "");
     butColor(colorSrcBtn, color);
     colorSrcBtn.helpTip = "Current Color";
+
     dstColorBtn = colorGrp.add("button", [100, 10, 120, 30], "");
     butColor(dstColorBtn, color);
     dstColorBtn.onClick = function() {
@@ -108,8 +121,13 @@ function updateUILayout(container) {
       var kids = this.parent.children;
       kids[3].text = floatToHex(pickedColor).toUpperCase();
     };
-
-    newColorText = colorGrp.add("staticText",[10,10,60,30], hexString );
+    newColorText = colorGrp.add("edittext",[10,10,70,30], hexString );
+    newColorText.onChange = function(){
+      var newColorFromHex = hexToFloat(this.text)
+      butColor(this.parent.children[2], newColorFromHex);
+      NEW_COLORS[index] = newColorFromHex;
+      
+    }
     parent.orientation = "column";
     updateUILayout(parent); //Update UI
   }
@@ -124,6 +142,10 @@ function updateUILayout(container) {
   //////////////////////////////////////////////////////////////// TOOLS  /////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+ *Remove all children of a ScriptGroup or Panuel
+ * @param {Group} parent UI Group where the children should be removed
+ */
   function removeAllChildren(parent) {
     var kids = parent.children;
     var numKids = kids.length;
@@ -136,6 +158,10 @@ function updateUILayout(container) {
     updateUILayout(parent); //Update UI
   }
 
+/**
+ * Convert AE colors into HEX 
+ * @param {Array} colorArray Array AE Colors 4D float
+ */
   function floatToHex (colorArray){
       R = parseInt(colorArray[0]*255);
       G = parseInt(colorArray[1]*255);
@@ -144,44 +170,57 @@ function updateUILayout(container) {
       hexArray = "#" + R.toString(16) + G.toString(16) + B.toString(16);
     return hexArray
   }
-
+/**
+ * Convert RGB values into HEX 
+ * @param {Number} r Red Value in Dec 0 - 255
+ * @param {Number} g Green Value in Dec 0 - 255
+ * @param {Number} b Blue Value in Dec 0 - 255
+ */
   function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r*255 << 16) + (g*255 << 8) + b*255).toString(16).slice(1);
 }
   // COLORS PALETTE FEATURES
+ 
+  function hexToFloat(myHexColor) {
+    r = HexToR(myHexColor) / 255;
+    g = HexToG(myHexColor) / 255;
+    b = HexToB(myHexColor) / 255;
+    var colors = [r, g, b, 1];
+    function HexToR(h) {
+      return parseInt((cutHex(h)).substring(0, 2), 16);
+    }
+    function HexToG(h) {
+      return parseInt((cutHex(h)).substring(2, 4), 16);
+    }
+    function HexToB(h) {
+      return parseInt((cutHex(h)).substring(4, 6), 16);
+    }
+    function cutHex(h) {
+      return (h.charAt(0) == "#") ? h.substring(1, 7) : h;
+    }
+    return colors;
+  }
+  /**
+   * Return AE Colors from ColorPicker
+   */
   var pickColor = function() {
     var myDecColor = 0;
     myDecColor = $.colorPicker();
 
     var myHexColor = myDecColor.toString(16);
 
-    r = HexToR(myHexColor) / 255;
-    g = HexToG(myHexColor) / 255;
-    b = HexToB(myHexColor) / 255;
-    var colors = [r, g, b, 1];
-
-    function HexToR(h) {
-      return parseInt((cutHex(h)).substring(0, 2), 16);
-    }
-
-    function HexToG(h) {
-      return parseInt((cutHex(h)).substring(2, 4), 16);
-    }
-
-    function HexToB(h) {
-      return parseInt((cutHex(h)).substring(4, 6), 16);
-    }
-
-    function cutHex(h) {
-      return (h.charAt(0) == "#") ? h.substring(1, 7) : h;
-    }
-    return colors;
+    return hexToFloat(myHexColor);
   };
 
+/**
+ * Assign a Color to a ScriptUI Button
+ * @param {Button} object The button to colorize
+ * @param {Array} color The AE color 4D- float
+ */
   var butColor = function(object, color) {
 
     if (String(color) != "undefined" && String(color) != "NaN")
-    if (color[0] > 0) {
+    if (color[0] >= 0) {
       object.onDraw = fillRect;
       object.fillBrush = object.graphics.newBrush(object.graphics.BrushType.SOLID_COLOR, color);
       object.visible = 0;
@@ -199,6 +238,12 @@ function updateUILayout(container) {
     }
   };
 
+/**
+ * Create a PNG from a binary String to create iconbutton
+ * @param {String} filename 
+ * @param {String} binaryString 
+ * @param {Folder} resourceFolder 
+ */
   function createResourceFile(filename, binaryString, resourceFolder) {
 
     var myFile = new File(resourceFolder + "/" + filename);
@@ -220,6 +265,9 @@ function updateUILayout(container) {
     return myFile;
   }
 
+/**
+ * Check AE prefs to be able to save an image created from a binary string
+ */
   function isSecurityPrefSet () {
     var securitySetting;
     try {
@@ -249,6 +297,12 @@ var ChangeColors = (function() {
  * @param {Array} newColors 
  */
   
+
+ /**
+  * Loop throught all Layers or selected layers to store the colors use
+  * inside a comp
+  * @return {Array} An aequery array with all the colors used on shapes
+  */
   function getColors (){
     compColors = aeq.arrayEx();
     colorProps = aeq.arrayEx();
@@ -288,16 +342,13 @@ var ChangeColors = (function() {
     return collectedColors;
   }
 
+/**
+ * Replace a color with the new one
+ * @param {Array} oldColors AE color Array 4d - float
+ * @param {Array} newColors AE color Array 4d - float
+ */
   function updateColors (oldColors,newColors){
-    // layers.forEach(function(shapeLayer) {
-    //   var props = aeq.arrayEx(
-    //     aeq.getPropertyChildren(shapeLayer, {
-    //       props: true,
-    //       separate: false,
-    //       groups: true
-    //     })
-    //   );
-
+    
     // assign colors from hard coded
     colorProps.forEach(function(prop) {
       if((prop.matchName === "ADBE Vector Stroke Color") || (prop.matchName === "ADBE Vector Fill Color")){
@@ -404,6 +455,11 @@ var isEqual = function (value, other) {
 
 };
 
+/**
+ * Check if a color Already exists in the collection
+ * @param {Array} arr 
+ * @param {Any} val 
+ */
 function findInArray(arr, val) {
   var found = false;
   for (var i = 0; i < arr.length; i++) {
@@ -424,3 +480,4 @@ return {
 })();
 
 })(this);
+

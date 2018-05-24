@@ -16,7 +16,6 @@ var ChangeColors = (function() {
     
     function getColors (){
       var collectedColors = aeq.arrayEx();
-
       layers.forEach(function(shapeLayer) {
         var props = aeq.arrayEx(
           aeq.getPropertyChildren(shapeLayer, {
