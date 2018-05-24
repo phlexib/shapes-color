@@ -6,6 +6,7 @@ const del = require('del');
 const exec = require('child_process').exec;
 const path = require('path');
 const jshint = require('gulp-jshint');
+var rename = require('gulp-rename');
 
 var pkg = require('./package.json');
 var headerTemplate =
@@ -28,7 +29,7 @@ function executeScript(absFilePath, callback){
 }
 
 gulp.task("runMyScript", ["buildMyScript"], function(done){
-  var absPath = path.join(__dirname, "dist/main.jsx");
+  var absPath = path.join(__dirname, "dist/Change-Shapes-Color.jsx");
   executeScript(absPath, function(error, stdout, stderr){
     done();
   });
@@ -39,6 +40,7 @@ gulp.task("buildMyScript", ["preprocessSources"], function(){
   return gulp.src(".temp/main.jsx")
     .pipe(include())
     .pipe(header(headerTemplate,{pkg:pkg}))
+    .pipe(rename("Change-Shapes-Color.jsx"))
     .pipe(gulp.dest("dist"))
   });
 
